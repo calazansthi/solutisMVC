@@ -1,0 +1,50 @@
+﻿@model Cidade
+@{
+    ViewData["Title"] = "Cadastrar cidade";
+}
+
+
+@Html.AntiForgeryToken()
+
+<h4>Cadastre cidade</h4>
+
+@Html.ValidationSummary("", new { @class = "text-danger" })
+
+<div class="panel panel-default container">
+    <div class="panel-body">
+        <div class="row">
+            <div class="form-group col-lg-4">
+                @Html.LabelFor(model => model.Nome)
+                @Html.EditorFor(model => model.Nome, new { htmlAttributes = new { @name = "Nome", @id = "nome", @type = "text", @class = "form-control", @value = "" } })
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-10">
+                <button id="btnCadastrar" type="submit" class="btn btn-success">Cadastrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("#btnCadastrar").click(function () {
+        $.ajax({
+            type: "Post",
+            url: '@Url.Action("Cadastrar", "Home")',
+            data: {
+                "modelo": $("#nome").val(),                
+            },
+            success: function (data) {
+                /*if (data.validado == false)
+                {
+                    ExibirNotificacaoErro(data.notificacoesErro.split(","))
+                    return false;
+                }
+                else
+                {*/                    
+                $(location).attr("href", "/");
+                //}
+            },            
+        });
+    });
+</script>
