@@ -14,7 +14,7 @@ namespace Tempo.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.11-servicing-32099")
+                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -33,7 +33,7 @@ namespace Tempo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cidades");
+                    b.ToTable("Cidade");
                 });
 #pragma warning restore 612, 618
         }
