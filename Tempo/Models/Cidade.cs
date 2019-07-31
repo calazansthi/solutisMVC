@@ -11,7 +11,7 @@ namespace Tempo.Models
     public class BaseModel
     {
         [DataMember]
-        public int Id { get; protected set; }
+        public int Id { get; set; }
     }
 
     public class Cidade : BaseModel
@@ -22,12 +22,13 @@ namespace Tempo.Models
         }
         
         [Required]
-        public string Nome { get; private set; }        
-        public string Condicao { get; private set; }
-        public decimal Temperatura { get; private set; }
+        public string Nome { get; set; }        
+        public string Condicao { get; set; }
+        public decimal Temperatura { get; set; }
 
-        public Cidade(string nome, string condicao, decimal temperatura)
-        {        
+        public Cidade(int id, string nome, string condicao, decimal temperatura)
+        {
+            this.Id = id;
             this.Nome = nome;
             this.Condicao = condicao;
             this.Temperatura = temperatura;

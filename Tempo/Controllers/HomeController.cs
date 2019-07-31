@@ -10,11 +10,11 @@ namespace Tempo.Controllers
 {
     public class HomeController : Controller
     {
-        ApplicationContext contexto;
+        private ApplicationContext contexto = new ApplicationContext();
 
         public IActionResult Index()
         {
-            IList<Cidade> cidades = contexto.Cidades.ToList();
+            IList<Cidade> cidades = contexto.Cidade.ToList();
             return View(cidades);
         }
 
@@ -24,10 +24,14 @@ namespace Tempo.Controllers
         }
 
         [HttpPost]
-        public void Cadastrar(Cidade modelo)
+        public IActionResult Create(Cidade modelo)
         {
-            contexto.Add(modelo);
-            contexto.SaveChanges();
+            if (ModelState.IsValid)
+            { 
+                contexto.Add(modelo);
+                contexto.SaveChanges();
+            }
+            return RedirectToAction("Index");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
