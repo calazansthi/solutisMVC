@@ -14,11 +14,11 @@
         <div class="panel-body">
             @Html.HiddenFor(model => model.Id)
             @Html.HiddenFor(model => model.Condicao)
-            @Html.HiddenFor(model => model.Temperatura, new { htmlAttributes = new { @value = "0" } })
+            @Html.HiddenFor(model => model.Temperatura)
             <div class="row">
                 <div class="form-group col-lg-4">
                     @Html.LabelFor(model => model.Nome)
-                    @Html.EditorFor(model => model.Nome, new { htmlAttributes = new { @type = "text", @class = "form-control", @value = "" } })
+                    @Html.EditorFor(model => model.Nome, new { htmlAttributes = new { @type = "text", @class = "form-control", @value = "", @required = "true" } })
                 </div>
             </div>
             <div class="row">
