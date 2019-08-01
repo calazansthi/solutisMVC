@@ -1,9 +1,7 @@
 ﻿@model Cidade
 @{
-    ViewData["Title"] = "Cadastrar cidade";
+    ViewData["Title"] = "Adicionar cidade";
 }
-
-<h4>Cadastre cidade</h4>
 
 @Html.ValidationSummary("", new { @class = "text-danger" })
 
@@ -15,17 +13,28 @@
             @Html.HiddenFor(model => model.Id)
             @Html.HiddenFor(model => model.Condicao)
             @Html.HiddenFor(model => model.Temperatura)
+
             <div class="row">
                 <div class="form-group col-lg-4">
                     @Html.LabelFor(model => model.Nome)
                     @Html.EditorFor(model => model.Nome, new { htmlAttributes = new { @type = "text", @class = "form-control", @value = "", @required = "true" } })
                 </div>
             </div>
+
             <div class="row">
                 <div class="form-group col-md-10">
-                    <button type="submit" class="btn btn-success">Cadastrar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-plus"></span>
+                        Adicionar cidade
+                    </button>
+                    <a href="/" class="btn btn-warning">
+                        <span class="glyphicon glyphicon-arrow-left"></span>
+                        Voltar
+                    </a>
                 </div>
-            </div>
+            </div>            
+
+            <p class="text-danger"> @Html.Raw(ViewBag.error) </p>            
         </div>
     </div>
 }

@@ -1,27 +1,44 @@
 ﻿@model IList<Cidade>
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="panel-body">
+
+<div class="panel-body">    
     <div class="row">
+        <a class="btn btn-primary" style="margin-bottom:10px;" asp-controller="Home" asp-action="Create">
+            <span class="glyphicon glyphicon-plus"></span>
+            Adicionar cidade
+        </a>
+
         @if (Model.Count > 0)
         {
             <table class="table table-condensed table-hover table-striped">
                 <thead>
                     <tr>
-                        <th>Cidade</th>
-                        <th>Condição</th>
-                        <th>Temperatura</th>
+                        <th class="col-lg-2">Cidade</th>
+                        <th class="col-lg-5">Condição</th>
+                        <th class="col-lg-1">Temperatura</th>
+                        <th class="col-lg-1 text-center">Remover</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @foreach (var item in Model)
                     {
                         <tr>
                             <td>@item.Nome</td>
                             <td>@item.Condicao</td>
-                            <td>@item.Temperatura</td>
+                            <td>@(item.Temperatura)º C</td>
+                            <td class="text-center">                                
+                                @using (Html.BeginForm("Delete", "Home", new { id = item.Id }))
+                                {
+                                    @Html.AntiForgeryToken()                                    
+                                    <button type="submit" class="btn btn-danger">
+                                        <span class="glyphicon glyphicon-minus-sign"></span>                                        
+                                    </button>                                        
+                                }
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -31,6 +48,5 @@
         {
             <h4>Não há cidades cadastradas</h4>
         }
-        <a class="btn btn-primary" asp-area="" asp-controller="Home" asp-action="Create">Cadastrar nova cidade</a>
     </div>
 </div>

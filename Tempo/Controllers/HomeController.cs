@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Nancy.Json;
+using Newtonsoft.Json;
 using Tempo.Models;
 
 namespace Tempo.Controllers
@@ -17,8 +18,12 @@ namespace Tempo.Controllers
         public IActionResult Index()
         {
             IList<Cidade> cidades = contexto.Cidade.ToList();
-            GetWeather(cidades);
-            return View(cidades);
+            if (cidades.Count > 0)
+            {
+                GetWeather(cidades);
+            }            
+
+            return View(cidades.OrderBy(x => x.Nome).ToList());
         }
 
         public IActionResult Create()
@@ -27,33 +32,80 @@ namespace Tempo.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Cidade modelo)
+        public IActionResult Create(Cidade cidade)
         {
+            GetCity(cidade);
+
             if (ModelState.IsValid)
-            { 
-                contexto.Add(modelo);
-                contexto.SaveChanges();
+            {
+                if (cidade.Nome != null)
+                {
+                    contexto.Add(cidade);
+                    contexto.SaveChanges();
+                    return RedirectToAction("Index");
+                }
             }
+            
+            return View("Create", cidade);
+        }
+
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            var cidade = contexto.Cidade.Find(id);            
+            contexto.Cidade.Remove(cidade);
+            contexto.SaveChanges();
+
             return RedirectToAction("Index");
         }
 
         private void GetWeather(IList<Cidade> cidades)
         {
-            string appId = "9e7abd10e9f6197be019c22cf2a6be0c";
             foreach (var cidade in cidades)
             {
-                string url = $"api.openweathermap.org/data/2.5/weather?q={cidade.Nome}&units=metric&APPID={appId}";
+                CreateRequest(cidade);
+                contexto.Update(cidade);
+            }
+        }
 
-                using (WebClient webClient = new WebClient())
+        private void GetCity(Cidade cidade)
+        {            
+            CreateRequest(cidade);             
+        }
+
+        private string GetAppId()
+        {
+            return "9e7abd10e9f6197be019c22cf2a6be0c";            
+        }      
+        
+        private void CreateRequest(Cidade cidade)
+        {
+            string url = $"https://api.openweathermap.org/data/2.5/weather?q={cidade.Nome}&units=metric&lang=pt&APPID={GetAppId()}";
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "GET";
+            try
+            {
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                 {
-                    string json = webClient.DownloadString(url);
-                    RootObject rootObject = (new JavaScriptSerializer()).Deserialize<RootObject>(json);
+                    Stream dataStream = response.GetResponseStream();
+                    StreamReader reader = new StreamReader(dataStream);
+                    RootObject rootObject = JsonConvert.DeserializeObject<RootObject>(reader.ReadToEnd());
                     cidade.Condicao = rootObject.weather.FirstOrDefault().description;
-                    cidade.Temperatura = rootObject.main.temp;
-                    contexto.Update(cidade);
+                    cidade.Temperatura = rootObject.main.temp;                    
                 }
             }
-            
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("404"))
+                {
+                    cidade.Nome = null;
+                    ViewBag.error = "Cidade não encontrada";
+                }
+                else
+                {
+                    ViewBag.error = "Aconteceu algum erro inesperado. Tente novamente em instantes";
+                }
+            }
         }
 
         public class Weather
