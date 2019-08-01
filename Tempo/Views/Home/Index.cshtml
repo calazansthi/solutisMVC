@@ -5,7 +5,7 @@
 
 
 <div class="panel-body">    
-    <div class="row">
+    <div id="info" class="row">
         <a class="btn btn-primary" style="margin-bottom:10px;" asp-controller="Home" asp-action="Create">
             <span class="glyphicon glyphicon-plus"></span>
             Adicionar cidade
@@ -13,7 +13,7 @@
 
         @if (Model.Count > 0)
         {
-            <table class="table table-condensed table-hover table-striped">
+            <table id="table" class="table table-condensed table-hover table-striped">
                 <thead>
                     <tr>
                         <th class="col-lg-2">Cidade</th>
@@ -26,18 +26,14 @@
                 <tbody>
                     @foreach (var item in Model)
                     {
-                        <tr>
+                        <tr id="linha-@item.Id">
                             <td>@item.Nome</td>
                             <td>@item.Condicao</td>
                             <td>@(item.Temperatura)º C</td>
-                            <td class="text-center">                                
-                                @using (Html.BeginForm("Delete", "Home", new { id = item.Id }))
-                                {
-                                    @Html.AntiForgeryToken()                                    
-                                    <button type="submit" class="btn btn-danger">
-                                        <span class="glyphicon glyphicon-minus-sign"></span>                                        
-                                    </button>                                        
-                                }
+                            <td class="text-center">                                                                
+                                <button type="reset" onclick="Delete(@item.Id)" class="btn btn-danger">
+                                    <span class="glyphicon glyphicon-minus-sign"></span>                                        
+                                </button>                                                                        
                             </td>
                         </tr>
                     }
@@ -50,3 +46,31 @@
         }
     </div>
 </div>
+
+<script>
+    function Delete(id) {
+        $.ajax({
+            type: "Post",
+            url: '@Url.Action("Delete", "Home")',
+            data: {
+                "id": id,
+            },
+            success: function () {
+                $("#linha-" + id + "").fadeOut(function () {
+                    $("#linha-" + id + "").remove();
+
+                    var linhasTabela = $("#table tr").length;
+                    if (linhasTabela == 1) {
+                        $("#table").fadeOut(function () {
+                            $("#table").remove();
+                            var semCidade = $("<h4>Não há cidades cadastradas</h4>").hide().fadeIn();
+                            $("#info").append(semCidade);
+                        });
+                    }
+                });
+            },
+            error: function (ajaxOptions, thrownError) {
+            },
+        });
+    }
+</script>

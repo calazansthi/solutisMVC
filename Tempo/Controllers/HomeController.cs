@@ -50,13 +50,11 @@ namespace Tempo.Controllers
         }
 
         [HttpPost]
-        public IActionResult Delete(int id)
+        public void Delete(int id)
         {
             var cidade = contexto.Cidade.Find(id);            
             contexto.Cidade.Remove(cidade);
             contexto.SaveChanges();
-
-            return RedirectToAction("Index");
         }
 
         private void GetWeather(IList<Cidade> cidades)
