@@ -3,21 +3,17 @@
     ViewData["Title"] = "Adicionar cidade";
 }
 
-@Html.ValidationSummary("", new { @class = "text-danger" })
+<script src="~/js/Create.js"></script>
+<input type="hidden" id="url-action" value="@Url.Action("AddCity", "Home")" />
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-    <div class="panel panel-default container">
-        <div class="panel-body">
-            @Html.HiddenFor(model => model.Id)
-            @Html.HiddenFor(model => model.Condicao)
-            @Html.HiddenFor(model => model.Temperatura)
-
+@Html.AntiForgeryToken()
+<div class="panel panel-default container" style="margin-top:15px">
+    <div class="panel-body">
+        <form method="post" id="formCidade" enctype="multipart/form-data">
             <div class="row">
                 <div class="form-group col-lg-4">
-                    @Html.LabelFor(model => model.Nome)
-                    @Html.EditorFor(model => model.Nome, new { htmlAttributes = new { @type = "text", @class = "form-control", @value = "", @required = "true" } })
+                    <label for="nome">Nome da cidade</label>
+                    <input id="nome" type="text" class="form-control" value="" required />
                 </div>
             </div>
 
@@ -32,9 +28,9 @@
                         Voltar
                     </a>
                 </div>
-            </div>            
-
-            <p class="text-danger"> @Html.Raw(ViewBag.error) </p>            
-        </div>
+            </div>
+        </form>
+        <div id="ok" class="text-primary"></div>
+        <div id="erro" class="text-danger"></div>
     </div>
-}
+</div>

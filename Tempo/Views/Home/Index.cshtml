@@ -3,19 +3,21 @@
     ViewData["Title"] = "Home";
 }
 
+<script src="~/js/Index.js"></script>
+<input type="hidden" id="delete-action" value="@Url.Action("Delete", "Home")" />
 
 <div class="panel-body">    
     <div id="info" class="row">
-        <a class="btn btn-primary" style="margin-bottom:10px;" asp-controller="Home" asp-action="Create">
+        <a class="btn btn-primary" style="margin-bottom:15px;" asp-controller="Home" asp-action="Create">
             <span class="glyphicon glyphicon-plus"></span>
             Adicionar cidade
         </a>
 
         @if (Model.Count > 0)
         {
-            <table id="table" class="table table-condensed table-hover table-striped">
+            <table id="table" class="table table-responsive table-middle">
                 <thead>
-                    <tr>
+                    <tr class="active" id="thead-active">
                         <th class="col-lg-2">Cidade</th>
                         <th class="col-lg-5">Condição</th>
                         <th class="col-lg-1">Temperatura</th>
@@ -27,18 +29,34 @@
                     @foreach (var item in Model)
                     {
                         <tr id="linha-@item.Id">
-                            <td>@item.Nome</td>
-                            <td>@item.Condicao</td>
+                            <td class="justify-content-center"><img width="20" src="http://openweathermap.org/images/flags/@(item.Pais.ToLower()).png" /> @item.Nome</td>
+                            <td><img src="http://openweathermap.org/img/wn/@(item.Icone).png" /> @item.Condicao</td>
                             <td>@(item.Temperatura)º C</td>
-                            <td class="text-center">                                                                
-                                <button type="reset" onclick="Delete(@item.Id)" class="btn btn-danger">
-                                    <span class="glyphicon glyphicon-minus-sign"></span>                                        
-                                </button>                                                                        
+                            <td class="text-center">
+                                <button type="button" data-toggle="modal" data-target="#modalDelete" onclick="SetIdCidade(@item.Id)" class="btn btn-danger">
+                                    <span class="glyphicon glyphicon-minus-sign"></span>
+                                </button>
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
+
+            <input id="idCidade" type="hidden" value="" />
+
+            <div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" aria-labelledby="modalDeleteLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalDeleteLabel">Deseja mesmo remover a cidade selecionada?</h5>                            
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal"><span class="glyphicon glyphicon-arrow-left"></span> Voltar</button>                            
+                            <button type="button" onclick="Delete()" class="btn btn-sm btn-danger" data-dismiss="modal"><span class="glyphicon glyphicon-minus"></span> Remover</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         }
         else
         {
@@ -47,30 +65,13 @@
     </div>
 </div>
 
-<script>
-    function Delete(id) {
-        $.ajax({
-            type: "Post",
-            url: '@Url.Action("Delete", "Home")',
-            data: {
-                "id": id,
-            },
-            success: function () {
-                $("#linha-" + id + "").fadeOut(function () {
-                    $("#linha-" + id + "").remove();
-
-                    var linhasTabela = $("#table tr").length;
-                    if (linhasTabela == 1) {
-                        $("#table").fadeOut(function () {
-                            $("#table").remove();
-                            var semCidade = $("<h4>Não há cidades cadastradas</h4>").hide().fadeIn();
-                            $("#info").append(semCidade);
-                        });
-                    }
-                });
-            },
-            error: function (ajaxOptions, thrownError) {
-            },
-        });
+<style>
+    #thead-active {
+        height: 50px;
+        font-size: 15px;
     }
-</script>
+    
+    .table-middle > thead > tr > th, .table-middle > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>

@@ -32,21 +32,40 @@ namespace Tempo.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Cidade cidade)
+        public ActionResult AddCity()
         {
-            GetCity(cidade);
+            var request = Request.Form.ToDictionary(x => x.Key, x => x.Value.ToString());
+            string nome = request["nome"];
 
-            if (ModelState.IsValid)
+            var cidadeExistente = contexto.Cidade.Where(x => x.Nome.ToLower().Equals(nome.ToLower()));
+            if (cidadeExistente.FirstOrDefault() != null)
             {
-                if (cidade.Nome != null)
-                {
-                    contexto.Add(cidade);
-                    contexto.SaveChanges();
-                    return RedirectToAction("Index");
-                }
+                return Json(new { success = false, message = "Ops, essa cidade já está cadastrada!" });
             }
             
-            return View("Create", cidade);
+            Cidade cidade = new Cidade { Nome = nome };
+            try {
+                if (ModelState.IsValid)
+                {
+                    GetCity(cidade);
+
+                    if (cidade.Nome != null)
+                    {
+                        contexto.Add(cidade);
+                        contexto.SaveChanges();
+                        return Json(new { success = true, message = "Cidade cadastrada com sucesso! Redirecionando para a página inicial." });
+                    }
+                }
+                return View("Create", cidade);                
+            } catch (Exception ex)
+            {
+                if (ex.Message.Contains("404"))
+                {
+                    string message = "Essa cidade não existe! Por favor, tente outra.";
+                    return Json(new { success = false, message });
+                }
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]
@@ -89,26 +108,21 @@ namespace Tempo.Controllers
                     StreamReader reader = new StreamReader(dataStream);
                     RootObject rootObject = JsonConvert.DeserializeObject<RootObject>(reader.ReadToEnd());
                     cidade.Condicao = rootObject.weather.FirstOrDefault().description;
-                    cidade.Temperatura = rootObject.main.temp;                    
+                    cidade.Icone = rootObject.weather.FirstOrDefault().icon;
+                    cidade.Temperatura = rootObject.main.temp;
+                    cidade.Pais = rootObject.sys.country;
                 }
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains("404"))
-                {
-                    cidade.Nome = null;
-                    ViewBag.error = "Cidade não encontrada";
-                }
-                else
-                {
-                    ViewBag.error = "Aconteceu algum erro inesperado. Tente novamente em instantes";
-                }
+                throw ex;                
             }
         }
 
         public class Weather
         {
             public string description { get; set; }
+            public string icon { get; set; }
         }
 
         public class Main
@@ -116,11 +130,17 @@ namespace Tempo.Controllers
             public decimal temp { get; set; }
         }
 
+        public class Sys
+        {
+            public string country { get; set; }
+        }
+
         public class RootObject
         {
             public List<Weather> weather { get; set; }
             public Main main { get; set; }
             public string name { get; set; }
+            public Sys sys { get; set; }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
