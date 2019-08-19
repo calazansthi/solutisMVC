@@ -2,6 +2,12 @@
     $("#idCidade").val(id);
 }
 
+$(document).ready(function () {
+    $("#btnVoltar").click(function () {
+        $("#idCidade").val("");
+    });
+});
+
 function Delete() {
     var id = $("#idCidade").val();
     var url = $("#delete-action").val();

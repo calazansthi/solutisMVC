@@ -128,7 +128,7 @@ namespace Tempo.Controllers
                     }
                 }
                 
-                ViewBag.Cidade = cidades;
+                ViewBag.Cidade = cidades.OrderBy(x => x.Nome);
                 ViewBag.Atual = currentList;
                 ViewBag.Previsao = forecastList;
             }
