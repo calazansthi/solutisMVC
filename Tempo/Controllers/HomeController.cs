@@ -36,12 +36,6 @@ namespace Tempo.Controllers
             var request = Request.Form.ToDictionary(x => x.Key, x => x.Value.ToString());
             string nome = request["nome"];
 
-            var cidadeExistente = contexto.Cidade.Where(x => x.Nome.ToLower().Equals(nome.ToLower()));
-            if (cidadeExistente.FirstOrDefault() != null)
-            {
-                return Json(new { success = false, message = "Ops, essa cidade já está cadastrada!" });
-            }
-
             Cidade cidade = new Cidade { Nome = nome };
             try
             {
@@ -78,6 +72,12 @@ namespace Tempo.Controllers
                     Current current = JsonConvert.DeserializeObject<Current>(reader.ReadToEnd());
                     cidade.CidadeId = current.id;
                     cidade.Nome = current.name;
+
+                    var cidadeExistente = contexto.Cidade.Where(x => x.CidadeId.Equals(current.id));
+                    if (cidadeExistente.FirstOrDefault() != null)
+                    {
+                        throw new Exception("Ops, essa cidade já está cadastrada!");
+                    }
                 }
             }
             catch (Exception ex)
