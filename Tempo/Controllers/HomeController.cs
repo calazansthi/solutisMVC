@@ -127,7 +127,7 @@ namespace Tempo.Controllers
                         dataStream = response.GetResponseStream();
                         reader = new StreamReader(dataStream);
                         forecast = JsonConvert.DeserializeObject<Forecast>(reader.ReadToEnd());
-                        var days = forecast.list.Where(x => x.dt_txt.Substring(11) == "12:00:00");
+                        var days = forecast.list.Where(x => x.dt_txt.Substring(11) == "00:00:00");
                         forecastList.AddRange(days);
                     }
                 }
