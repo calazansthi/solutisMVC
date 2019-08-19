@@ -1,43 +1,102 @@
-﻿@model IList<Cidade>
-@{
+﻿@{
     ViewData["Title"] = "Home";
+
+    List<Cidade> cidadeList = new List<Cidade>();
+    List<Current> currentList = new List<Current>();
+    List<ListForecast> forecastList = new List<ListForecast>();
+    if (ViewBag.Cidade != null)
+    {
+        cidadeList = (ViewBag.Cidade as IEnumerable<Cidade>).ToList();
+        currentList = (ViewBag.Atual as IEnumerable<Current>).ToList();
+        forecastList = (ViewBag.Previsao as IEnumerable<ListForecast>).ToList();
+    }
+
+    var today = DateTime.Now;
+    var d1 = today.AddDays(1);
+    var d2 = today.AddDays(2);
+    var d3 = today.AddDays(3);
+    var d4 = today.AddDays(4);
+    var d5 = today.AddDays(5);
+    var y = 0;
 }
 
 <script src="~/js/Index.js"></script>
+<input type="hidden" id="refresh-action" value="@Url.Action("AjaxWeather", "Home")" />
 <input type="hidden" id="delete-action" value="@Url.Action("Delete", "Home")" />
 
-<div class="panel-body">    
+<div class="panel-body">
     <div id="info" class="row">
         <a class="btn btn-primary" style="margin-bottom:15px;" asp-controller="Home" asp-action="Create">
             <span class="glyphicon glyphicon-plus"></span>
             Adicionar cidade
         </a>
 
-        @if (Model.Count > 0)
+        @if (cidadeList.Count > 0)
         {
             <table id="table" class="table table-responsive table-middle">
                 <thead>
                     <tr class="active" id="thead-active">
-                        <th class="col-lg-2">Cidade</th>
-                        <th class="col-lg-5">Condição</th>
-                        <th class="col-lg-1">Temperatura</th>
-                        <th class="col-lg-1 text-center">Remover</th>
+                        <th>Cidade</th>
+                        <th>Hoje</th>
+                        <th>@(d1.ToString("dddd").First().ToString().ToUpper() + d1.ToString("dddd").Substring(1))</th>
+                        <th>@(d2.ToString("dddd").First().ToString().ToUpper() + d2.ToString("dddd").Substring(1))</th>
+                        <th>@(d3.ToString("dddd").First().ToString().ToUpper() + d3.ToString("dddd").Substring(1))</th>
+                        <th>@(d4.ToString("dddd").First().ToString().ToUpper() + d4.ToString("dddd").Substring(1))</th>
+                        <th>@(d5.ToString("dddd").First().ToString().ToUpper() + d5.ToString("dddd").Substring(1))</th>
+                        <th class="text-center">Remover</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    @foreach (var item in Model)
+                    @for (int i = 0; cidadeList.Count() > i; i++)
                     {
-                        <tr id="linha-@item.Id">
-                            <td class="justify-content-center"><img width="20" src="http://openweathermap.org/images/flags/@(item.Pais.ToLower()).png" /> @item.Nome</td>
-                            <td><img src="http://openweathermap.org/img/wn/@(item.Icone).png" /> @item.Condicao</td>
-                            <td>@(item.Temperatura)º C</td>
-                            <td class="text-center">
-                                <button type="button" data-toggle="modal" data-target="#modalDelete" onclick="SetIdCidade(@item.Id)" class="btn btn-danger">
-                                    <span class="glyphicon glyphicon-minus-sign"></span>
-                                </button>
-                            </td>
-                        </tr>
+                        var id = cidadeList[i].Id;
+                        var current = currentList[i];
+                        var f1 = forecastList[y]; y++;
+                        var f2 = forecastList[y]; y++;
+                        var f3 = forecastList[y]; y++;
+                        var f4 = forecastList[y]; y++;
+                        var f5 = forecastList[y]; y++;
+                    <tr id="linha-@id">
+                        <td class="justify-content-center">
+                            <img width="20" src="http://openweathermap.org/images/flags/@(current.sys.country.ToLower()).png" /> 
+                            @(current.name)
+                        </td>
+                        <td>
+                            <img src="http://openweathermap.org/img/wn/@(current.weather.FirstOrDefault().icon).png" /> <br />
+                            @(current.weather.FirstOrDefault().description) <br />
+                            @(current.main.temp)º C 
+                        </td>
+                        <td>
+                            <img src="http://openweathermap.org/img/wn/@(f1.weather.FirstOrDefault().icon).png" /> <br />
+                            @(f1.weather.FirstOrDefault().description) <br />
+                            @(f1.main.temp)º C
+                        </td>
+                        <td>
+                            <img src="http://openweathermap.org/img/wn/@(f2.weather.FirstOrDefault().icon).png" /> <br />
+                            @(f2.weather.FirstOrDefault().description) <br />
+                            @(f2.main.temp)º C 
+                        </td>
+                        <td>
+                            <img src="http://openweathermap.org/img/wn/@(f3.weather.FirstOrDefault().icon).png" /> <br />
+                            @(f3.weather.FirstOrDefault().description) <br />
+                            @(f3.main.temp)º C 
+                        </td>
+                        <td>
+                            <img src="http://openweathermap.org/img/wn/@(f4.weather.FirstOrDefault().icon).png" /> <br />
+                            @(f4.weather.FirstOrDefault().description) <br />
+                            @(f4.main.temp)º C 
+                        </td>
+                        <td>
+                            <img src="http://openweathermap.org/img/wn/@(f5.weather.FirstOrDefault().icon).png" /> <br />
+                            @(f5.weather.FirstOrDefault().description) <br />
+                            @(f5.main.temp)º C 
+                        </td>
+                        <td class="text-center">
+                            <button type="button" data-toggle="modal" data-target="#modalDelete" onclick="SetIdCidade(@id)" class="btn btn-danger">
+                                <span class="glyphicon glyphicon-minus-sign"></span>
+                            </button>
+                        </td>
+                    </tr>
                     }
                 </tbody>
             </table>
@@ -48,10 +107,10 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="modalDeleteLabel">Deseja mesmo remover a cidade selecionada?</h5>                            
+                            <h5 class="modal-title" id="modalDeleteLabel">Deseja mesmo remover a cidade selecionada?</h5>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal"><span class="glyphicon glyphicon-arrow-left"></span> Voltar</button>                            
+                            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal"><span class="glyphicon glyphicon-arrow-left"></span> Voltar</button>
                             <button type="button" onclick="Delete()" class="btn btn-sm btn-danger" data-dismiss="modal"><span class="glyphicon glyphicon-minus"></span> Remover</button>
                         </div>
                     </div>
@@ -70,7 +129,7 @@
         height: 50px;
         font-size: 15px;
     }
-    
+
     .table-middle > thead > tr > th, .table-middle > tbody > tr > td {
         vertical-align: middle;
     }

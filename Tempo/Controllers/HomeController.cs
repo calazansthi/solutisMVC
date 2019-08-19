@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Tempo.Models;
@@ -21,9 +20,9 @@ namespace Tempo.Controllers
             if (cidades.Count > 0)
             {
                 GetWeather(cidades);
-            }            
+            }
 
-            return View(cidades.OrderBy(x => x.Nome).ToList());
+            return View();
         }
 
         public IActionResult Create()
@@ -42,60 +41,30 @@ namespace Tempo.Controllers
             {
                 return Json(new { success = false, message = "Ops, essa cidade já está cadastrada!" });
             }
-            
+
             Cidade cidade = new Cidade { Nome = nome };
-            try {
+            try
+            {
                 if (ModelState.IsValid)
                 {
                     GetCity(cidade);
-
-                    if (cidade.Nome != null)
-                    {
-                        contexto.Add(cidade);
-                        contexto.SaveChanges();
-                        return Json(new { success = true, message = "Cidade cadastrada com sucesso! Redirecionando para a página inicial." });
-                    }
+                    contexto.Add(cidade);
+                    contexto.SaveChanges();
+                    return Json(new { success = true, message = "Cidade adicionada com sucesso! Redirecionando para a página inicial." });
                 }
-                return View("Create", cidade);                
-            } catch (Exception ex)
+                return Json(new { success = false, message = "Ops, os dados não foram preenchidos corretamente. Tente novamente." });
+            }
+            catch (Exception ex)
             {
                 if (ex.Message.Contains("404"))
                 {
-                    string message = "Essa cidade não existe! Por favor, tente outra.";
-                    return Json(new { success = false, message });
+                    return Json(new { success = false, message = "Essa cidade não existe! Por favor, tente outra." });
                 }
                 return Json(new { success = false, message = ex.Message });
             }
         }
 
-        [HttpPost]
-        public void Delete(int id)
-        {
-            var cidade = contexto.Cidade.Find(id);            
-            contexto.Cidade.Remove(cidade);
-            contexto.SaveChanges();
-        }
-
-        private void GetWeather(IList<Cidade> cidades)
-        {
-            foreach (var cidade in cidades)
-            {
-                CreateRequest(cidade);
-                contexto.Update(cidade);
-            }
-        }
-
         private void GetCity(Cidade cidade)
-        {            
-            CreateRequest(cidade);             
-        }
-
-        private string GetAppId()
-        {
-            return "9e7abd10e9f6197be019c22cf2a6be0c";            
-        }      
-        
-        private void CreateRequest(Cidade cidade)
         {
             string url = $"https://api.openweathermap.org/data/2.5/weather?q={cidade.Nome}&units=metric&lang=pt&APPID={GetAppId()}";
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
@@ -105,43 +74,74 @@ namespace Tempo.Controllers
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                 {
                     Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    RootObject rootObject = JsonConvert.DeserializeObject<RootObject>(reader.ReadToEnd());
-                    cidade.Condicao = rootObject.weather.FirstOrDefault().description;
-                    cidade.Icone = rootObject.weather.FirstOrDefault().icon;
-                    cidade.Temperatura = rootObject.main.temp;
-                    cidade.Pais = rootObject.sys.country;
                 }
             }
             catch (Exception ex)
             {
-                throw ex;                
+                throw ex;
             }
         }
 
-        public class Weather
+        [HttpPost]
+        public void Delete(int id)
         {
-            public string description { get; set; }
-            public string icon { get; set; }
+            var cidade = contexto.Cidade.Find(id);
+            contexto.Cidade.Remove(cidade);
+            contexto.SaveChanges();
         }
 
-        public class Main
+        private void GetWeather(IList<Cidade> cidades)
         {
-            public decimal temp { get; set; }
-        }
+            try
+            {
+                var currentList = new List<Current>();
+                var forecastList = new List<ListForecast>();
 
-        public class Sys
-        {
-            public string country { get; set; }
-        }
+                Stream dataStream;
+                StreamReader reader;
+                HttpWebResponse response;
+                Current current = new Current();
+                Forecast forecast = new Forecast();
 
-        public class RootObject
+                foreach (var cidade in cidades.OrderBy(x => x.Nome))
+                {
+                    string url = $"https://api.openweathermap.org/data/2.5/weather?q={cidade.Nome}&units=metric&lang=pt&APPID={GetAppId()}";
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                    request.Method = "GET";
+                    using (response = (HttpWebResponse)request.GetResponse())
+                    {
+                        dataStream = response.GetResponseStream();
+                        reader = new StreamReader(dataStream);
+                        current = JsonConvert.DeserializeObject<Current>(reader.ReadToEnd());
+                        currentList.Add(current);
+                    }
+
+                    url = $"https://api.openweathermap.org/data/2.5/forecast?q={cidade.Nome}&units=metric&lang=pt&APPID={GetAppId()}";
+                    request = (HttpWebRequest)WebRequest.Create(url);
+                    using (response = (HttpWebResponse)request.GetResponse())
+                    {
+                        dataStream = response.GetResponseStream();
+                        reader = new StreamReader(dataStream);
+                        forecast = JsonConvert.DeserializeObject<Forecast>(reader.ReadToEnd());
+                        var days = forecast.list.Where(x => x.dt_txt.Substring(11) == "12:00:00");
+                        forecastList.AddRange(days);
+                    }
+                }
+                
+                ViewBag.Cidade = cidades;
+                ViewBag.Atual = currentList;
+                ViewBag.Previsao = forecastList;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }        
+
+        private string GetAppId()
         {
-            public List<Weather> weather { get; set; }
-            public Main main { get; set; }
-            public string name { get; set; }
-            public Sys sys { get; set; }
-        }
+            return "9e7abd10e9f6197be019c22cf2a6be0c";
+        }        
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
