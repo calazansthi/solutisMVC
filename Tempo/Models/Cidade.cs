@@ -23,19 +23,13 @@ namespace Tempo.Models
         
         [Required]
         public string Nome { get; set; }        
-        public string Condicao { get; set; }
-        public decimal? Temperatura { get; set; }
-        public string Pais { get; set; }
-        public string Icone { get; set; }
-        
-        public Cidade(int id, string nome, string condicao, decimal temperatura, string pais, string icone)
+        public int CidadeId { get; set; }
+
+        public Cidade(int id, string nome, int cidadeId)
         {
             this.Id = id;
             this.Nome = nome;
-            this.Condicao = condicao;
-            this.Temperatura = temperatura;            
-            this.Pais = pais;
-            this.Icone = icone;
+            this.CidadeId = cidadeId;
         }
     }
 }

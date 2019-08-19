@@ -9,6 +9,7 @@ namespace Tempo.Models
     {
         public List<WeatherCurrent> weather { get; set; }
         public MainCurrent main { get; set; }
+        public int id { get; set; }
         public string name { get; set; }
         public SysCurrent sys { get; set; }
     }

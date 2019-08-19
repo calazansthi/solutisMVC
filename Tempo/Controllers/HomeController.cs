@@ -74,6 +74,10 @@ namespace Tempo.Controllers
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                 {
                     Stream dataStream = response.GetResponseStream();
+                    StreamReader reader = new StreamReader(dataStream);
+                    Current current = JsonConvert.DeserializeObject<Current>(reader.ReadToEnd());
+                    cidade.CidadeId = current.id;
+                    cidade.Nome = current.name;
                 }
             }
             catch (Exception ex)
@@ -105,7 +109,7 @@ namespace Tempo.Controllers
 
                 foreach (var cidade in cidades.OrderBy(x => x.Nome))
                 {
-                    string url = $"https://api.openweathermap.org/data/2.5/weather?q={cidade.Nome}&units=metric&lang=pt&APPID={GetAppId()}";
+                    string url = $"https://api.openweathermap.org/data/2.5/weather?id={cidade.CidadeId}&units=metric&lang=pt&APPID={GetAppId()}";
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                     request.Method = "GET";
                     using (response = (HttpWebResponse)request.GetResponse())
@@ -116,7 +120,7 @@ namespace Tempo.Controllers
                         currentList.Add(current);
                     }
 
-                    url = $"https://api.openweathermap.org/data/2.5/forecast?q={cidade.Nome}&units=metric&lang=pt&APPID={GetAppId()}";
+                    url = $"https://api.openweathermap.org/data/2.5/forecast?id={cidade.CidadeId}&units=metric&lang=pt&APPID={GetAppId()}";
                     request = (HttpWebRequest)WebRequest.Create(url);
                     using (response = (HttpWebResponse)request.GetResponse())
                     {

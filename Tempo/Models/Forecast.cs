@@ -8,6 +8,12 @@ namespace Tempo.Models
     public class Forecast
     {
         public IList<ListForecast> list { get; set; }
+        public City city { get; set; }
+    }
+
+    public class City
+    {
+        public string name { get; set; }
     }
 
     public class ListForecast

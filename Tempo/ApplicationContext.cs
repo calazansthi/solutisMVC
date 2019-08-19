@@ -17,7 +17,6 @@ namespace Tempo
         {            
             if (!options.IsConfigured)
             {
-                //string connectionString = Configuration.GetConnectionString("Default");
                 options.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Tempo;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
             }
         }
